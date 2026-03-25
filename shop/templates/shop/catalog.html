@@ -1,0 +1,142 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Каталог — Emotions{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">
+            {% if current_category %}
+                {{ current_category.name }}
+            {% else %}
+                Каталог цветов
+            {% endif %}
+        </h1>
+        <p class="page-subtitle">
+            {% if current_category and current_category.description %}
+                {{ current_category.description }}
+            {% else %}
+                Выберите идеальный букет для любого случая
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="section catalog-section">
+    <div class="container">
+        <div class="catalog-layout">
+            <!-- Sidebar Filters -->
+            <aside class="catalog-sidebar">
+                <div class="filter-card">
+                    <div class="catalog-tabs">
+                        <a href="?type=bouquet{% if current_category %}&category={{ current_category.slug }}{% endif %}{% if current_sort != 'default' %}&sort={{ current_sort }}{% endif %}" 
+                           class="tab-link {% if current_type == 'bouquet' %}active{% endif %}">
+                            💐 Букеты
+                        </a>
+                        <a href="?type=stem{% if current_category %}&category={{ current_category.slug }}{% endif %}{% if current_sort != 'default' %}&sort={{ current_sort }}{% endif %}" 
+                           class="tab-link {% if current_type == 'stem' %}active{% endif %}">
+                            🌹 Поштучно
+                        </a>
+                    </div>
+                </div>
+
+                <div class="filter-card">
+                    <h3 class="filter-title">Категории</h3>
+                    <ul class="filter-list">
+                        <li>
+                            <a href="?type={{ current_type }}{% if current_sort != 'default' %}&sort={{ current_sort }}{% endif %}"
+                               class="filter-link {% if not current_category %}active{% endif %}">
+                                Все {% if current_type == 'stem' %}цветы{% else %}букеты{% endif %}
+                            </a>
+                        </li>
+                        {% for cat in categories %}
+                        <li>
+                            <a href="?type={{ current_type }}&category={{ cat.slug }}{% if current_sort != 'default' %}&sort={{ current_sort }}{% endif %}"
+                               class="filter-link {% if current_category.slug == cat.slug %}active{% endif %}">
+                                {{ cat.name }}
+                                <span class="filter-count">{{ cat.product_count }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="filter-card">
+                    <h3 class="filter-title">Сортировка</h3>
+                    <ul class="filter-list">
+                        <li>
+                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=default"
+                               class="filter-link {% if current_sort == 'default' %}active{% endif %}">
+                                По умолчанию
+                            </a>
+                        </li>
+                        <li>
+                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_asc"
+                               class="filter-link {% if current_sort == 'price_asc' %}active{% endif %}">
+                                Сначала дешёвые
+                            </a>
+                        </li>
+                        <li>
+                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_desc"
+                               class="filter-link {% if current_sort == 'price_desc' %}active{% endif %}">
+                                Сначала дорогие
+                            </a>
+                        </li>
+                        <li>
+                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=newest"
+                               class="filter-link {% if current_sort == 'newest' %}active{% endif %}">
+                                Новинки
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="catalog-main">
+                {% if products %}
+                <div class="products-grid">
+                    {% for product in products %}
+                    <div class="product-card animate-on-scroll">
+                        <a href="{{ product.get_absolute_url }}" class="product-image-link">
+                            <div class="product-image-wrapper">
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
+                                {% endif %}
+                                <div class="product-overlay">
+                                    <span class="product-view-btn">Подробнее</span>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="product-info">
+                            <span class="product-category">{{ product.category.name }}</span>
+                            <h3 class="product-name">
+                                <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                            </h3>
+                            <div class="product-bottom">
+                                <span class="product-price">{{ product.price|floatformat:0 }} ₽{% if product.is_by_stem %} / шт.{% endif %}</span>
+                                <form method="post" action="{% url 'shop:cart_add' product.id %}" class="add-to-cart-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn btn-cart" title="В корзину">
+                                        🛒
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🌷</div>
+                    <h3>Товары не найдены</h3>
+                    <p>В данной категории пока нет товаров</p>
+                    <a href="{% url 'shop:catalog' %}" class="btn btn-primary">Все категории</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — Emotions{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:30 }}{% endblock %}
+
+{% block content %}
+<section class="section product-detail-section">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{% url 'shop:home' %}">Главная</a>
+            <span>/</span>
+            <a href="{% url 'shop:catalog' %}">Каталог</a>
+            <span>/</span>
+            <a href="{% url 'shop:catalog' %}?category={{ product.category.slug }}">{{ product.category.name }}</a>
+            <span>/</span>
+            <span class="current">{{ product.name }}</span>
+        </nav>
+
+        <div class="product-detail">
+            <div class="product-gallery">
+                <div class="product-main-image">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" id="mainImage">
+                    {% endif %}
+                </div>
+                {% if product.image_alt %}
+                <div class="product-thumbnails">
+                    <button class="thumb active" onclick="changeImage('{{ product.image.url }}', this)">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    </button>
+                    <button class="thumb" onclick="changeImage('{{ product.image_alt.url }}', this)">
+                        <img src="{{ product.image_alt.url }}" alt="{{ product.name }}">
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="product-detail-info">
+                <span class="product-detail-category">{{ product.category.name }}</span>
+                <h1 class="product-detail-name">{{ product.name }}</h1>
+                <div class="product-detail-price">{{ product.price|floatformat:0 }} ₽</div>
+
+                {% if product.description %}
+                <div class="product-detail-desc">
+                    <h3>Описание</h3>
+                    <p>{{ product.description|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+
+                {% if product.composition %}
+                <div class="product-detail-comp">
+                    <h3>Состав букета</h3>
+                    <p>{{ product.composition|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'shop:cart_add' product.id %}" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    
+                    {% if variants %}
+                    <div class="product-variants">
+                        <h3 class="variants-title">Выберите {{ variants.0.name }}</h3>
+                    <div class="variants-grid">
+                        {% for variant in variants %}
+                        <label class="variant-item">
+                            <input type="radio" name="variant" value="{{ variant.id }}" {% if forloop.first %}checked{% endif %} data-price="{{ variant.price|floatformat:0 }}">
+                            <span class="variant-box">{{ variant.value }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                    <div class="purchase-controls">
+                        <div class="quantity-selector">
+                            <button type="button" class="qty-btn" onclick="decrementQty()">−</button>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" class="qty-input">
+                            <button type="button" class="qty-btn" onclick="incrementQty()">+</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            🛒 В корзину
+                        </button>
+                    </div>
+                </form>
+
+                <div class="product-features">
+                    <div class="pf-item">
+                        <span class="pf-icon">🚚</span>
+                        <span>Бесплатная доставка от 5000 ₽</span>
+                    </div>
+                    <div class="pf-item">
+                        <span class="pf-icon">⏰</span>
+                        <span>Доставка за 2 часа</span>
+                    </div>
+                    <div class="pf-item">
+                        <span class="pf-icon">🌿</span>
+                        <span>Свежие цветы каждый день</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Products -->
+{% if related %}
+<section class="section related-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Похожие букеты</h2>
+        </div>
+        <div class="products-grid">
+            {% for product in related %}
+            <div class="product-card animate-on-scroll">
+                <a href="{{ product.get_absolute_url }}" class="product-image-link">
+                    <div class="product-image-wrapper">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
+                        {% endif %}
+                        <div class="product-overlay">
+                            <span class="product-view-btn">Подробнее</span>
+                        </div>
+                    </div>
+                </a>
+                <div class="product-info">
+                    <span class="product-category">{{ product.category.name }}</span>
+                    <h3 class="product-name">
+                        <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                    </h3>
+                    <div class="product-bottom">
+                        <span class="product-price">{{ product.price|floatformat:0 }} ₽</span>
+                        <form method="post" action="{% url 'shop:cart_add' product.id %}" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-cart" title="В корзину">🛒</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function changeImage(url, el) {
+    document.getElementById('mainImage').src = url;
+    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function incrementQty() {
+    const input = document.getElementById('quantity');
+    input.value = parseInt(input.value) + 1;
+}
+
+function decrementQty() {
+    const input = document.getElementById('quantity');
+    if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+    }
+}
+
+document.querySelectorAll('input[name="variant"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const price = e.target.getAttribute('data-price');
+        document.querySelector('.product-detail-price').innerText = price + ' ₽';
+    });
+});
+</script>
+{% endblock %}

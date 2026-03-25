@@ -1,0 +1,99 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Корзина — Emotions{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">Корзина</h1>
+    </div>
+</section>
+
+<section class="section cart-section">
+    <div class="container">
+        {% if cart_items %}
+        <div class="cart-layout">
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item animate-on-scroll">
+                    <div class="cart-item-image">
+                        {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="cart-item-info">
+                        <h3 class="cart-item-name">
+                            <a href="{{ item.product.get_absolute_url }}">{{ item.name }}</a>
+                        </h3>
+                        <span class="cart-item-category">{{ item.product.category.name }}</span>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <form method="post" action="{% url 'shop:cart_update' item.key %}" class="qty-form">
+                            {% csrf_token %}
+                            <button type="button" class="qty-btn qty-minus" onclick="updateQty(this, -1)">−</button>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99" class="qty-input" onchange="this.form.submit()">
+                            <button type="button" class="qty-btn qty-plus" onclick="updateQty(this, 1)">+</button>
+                        </form>
+                    </div>
+                    <div class="cart-item-price">
+                        <span class="item-total">{{ item.total|floatformat:0 }} ₽</span>
+                        <span class="item-unit">{{ item.price|floatformat:0 }} ₽{% if item.product.is_by_stem %} / шт.{% endif %}</span>
+                    </div>
+                    <form method="post" action="{% url 'shop:cart_remove' item.key %}">
+                        {% csrf_token %}
+                        <button type="submit" class="cart-item-remove" title="Удалить">&times;</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-card">
+                    <h3>Итого</h3>
+                    <div class="summary-row">
+                        <span>Товары ({{ cart_count }} шт.)</span>
+                        <span>{{ total|floatformat:0 }} ₽</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Доставка</span>
+                        <span>{% if total >= 5000 %}Бесплатно{% else %}500 ₽{% endif %}</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-row summary-total">
+                        <span>К оплате</span>
+                        {% if total >= 5000 %}
+                        <span>{{ total|floatformat:0 }} ₽</span>
+                        {% else %}
+                        <span>{{ total|add:500|floatformat:0 }} ₽</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg btn-full">Оформить заказ</a>
+                    <a href="{% url 'shop:catalog' %}" class="btn btn-outline btn-full" style="margin-top: 0.5rem;">Продолжить покупки</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🛒</div>
+            <h3>Корзина пуста</h3>
+            <p>Добавьте букеты из нашего каталога</p>
+            <a href="{% url 'shop:catalog' %}" class="btn btn-primary btn-lg">Перейти в каталог</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateQty(btn, delta) {
+    const input = btn.parentElement.querySelector('.qty-input');
+    let val = parseInt(input.value) + delta;
+    if (val < 1) val = 1;
+    if (val > 99) val = 99;
+    input.value = val;
+    btn.closest('form').submit();
+}
+</script>
+{% endblock %}

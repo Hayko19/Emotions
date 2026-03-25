@@ -1,0 +1,280 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Панель управления — Emotions{% endblock %}
+
+{% block content %}
+<section class="page-header dash-header">
+    <div class="container">
+        <h1 class="page-title">📊 Панель управления</h1>
+        <p class="page-subtitle">Emotions — Статистика магазина</p>
+        <div class="dash-actions">
+            <a href="/admin/" class="btn btn-outline">⚙️ Django Admin</a>
+            <a href="{% url 'shop:catalog' %}" class="btn btn-primary">🌸 Магазин</a>
+        </div>
+    </div>
+</section>
+
+<section class="section dash-section">
+    <div class="container">
+
+        <!-- Revenue KPIs -->
+        <div class="dash-kpi-grid">
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">{{ revenue_today|floatformat:0 }} ₽</div>
+                    <div class="kpi-label">Сегодня</div>
+                </div>
+            </div>
+            <div class="kpi-card kpi-green">
+                <div class="kpi-icon">📅</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">{{ revenue_week|floatformat:0 }} ₽</div>
+                    <div class="kpi-label">За неделю</div>
+                </div>
+            </div>
+            <div class="kpi-card kpi-gold">
+                <div class="kpi-icon">📆</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">{{ revenue_month|floatformat:0 }} ₽</div>
+                    <div class="kpi-label">За месяц</div>
+                </div>
+            </div>
+            <div class="kpi-card kpi-rose">
+                <div class="kpi-icon">🏆</div>
+                <div class="kpi-content">
+                    <div class="kpi-value">{{ total_revenue|floatformat:0 }} ₽</div>
+                    <div class="kpi-label">Всего выручка</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Status Cards -->
+        <div class="dash-row">
+            <div class="dash-col-wide">
+                <div class="dash-card">
+                    <h3 class="dash-card-title">📦 Заказы по статусам</h3>
+                    <div class="status-grid">
+                        <a href="/admin/shop/order/?status=new" class="status-card status-new">
+                            <span class="status-count">{{ new_orders }}</span>
+                            <span class="status-label">🆕 Новые</span>
+                        </a>
+                        <a href="/admin/shop/order/?status=processing" class="status-card status-processing">
+                            <span class="status-count">{{ processing_orders }}</span>
+                            <span class="status-label">⚙️ В обработке</span>
+                        </a>
+                        <a href="/admin/shop/order/?status=delivering" class="status-card status-delivering">
+                            <span class="status-count">{{ delivering_orders }}</span>
+                            <span class="status-label">🚚 Доставляется</span>
+                        </a>
+                        <a href="/admin/shop/order/?status=completed" class="status-card status-completed">
+                            <span class="status-count">{{ completed_orders }}</span>
+                            <span class="status-label">✅ Выполнен</span>
+                        </a>
+                        <a href="/admin/shop/order/?status=cancelled" class="status-card status-cancelled">
+                            <span class="status-count">{{ cancelled_orders }}</span>
+                            <span class="status-label">❌ Отменён</span>
+                        </a>
+                        <div class="status-card status-all">
+                            <span class="status-count">{{ total_orders }}</span>
+                            <span class="status-label">📋 Всего</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="dash-card">
+                    <h3 class="dash-card-title">📈 Заказы за 7 дней</h3>
+                    <div class="chart-container">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products & Categories stats -->
+            <div class="dash-col-narrow">
+                <div class="dash-card">
+                    <h3 class="dash-card-title">🌸 Товары</h3>
+                    <div class="stat-list">
+                        <div class="stat-row">
+                            <span class="stat-label">Всего товаров</span>
+                            <span class="stat-value">{{ total_products }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">В наличии</span>
+                            <span class="stat-value stat-green">{{ available_products }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">На главной</span>
+                            <span class="stat-value stat-gold">{{ featured_products }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Категорий</span>
+                            <span class="stat-value">{{ total_categories }}</span>
+                        </div>
+                    </div>
+                    <div class="dash-card-links">
+                        <a href="/admin/shop/product/add/" class="btn btn-primary btn-sm">+ Добавить товар</a>
+                        <a href="/admin/shop/product/" class="btn btn-outline btn-sm">Все товары</a>
+                    </div>
+                </div>
+
+                {% if top_products %}
+                <div class="dash-card">
+                    <h3 class="dash-card-title">🔥 Топ продаж</h3>
+                    <div class="top-list">
+                        {% for p in top_products %}
+                        <div class="top-item">
+                            <div class="top-rank">{{ forloop.counter }}</div>
+                            <div class="top-info">
+                                <span class="top-name">{{ p.product__name }}</span>
+                                <span class="top-stats">{{ p.total_sold }} шт. | {{ p.order_count }} заказов</span>
+                            </div>
+                            <div class="top-price">{{ p.product__price|floatformat:0 }} ₽</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="dash-card">
+            <div class="dash-card-header-row">
+                <h3 class="dash-card-title">🕐 Последние заказы</h3>
+                <a href="/admin/shop/order/" class="btn btn-outline btn-sm">Все заказы</a>
+            </div>
+            {% if recent_orders %}
+            <div class="orders-table-wrapper">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Клиент</th>
+                            <th>Телефон</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr class="order-row">
+                            <td class="order-id">#{{ order.id }}</td>
+                            <td>{{ order.first_name }} {{ order.last_name }}</td>
+                            <td>{{ order.phone }}</td>
+                            <td class="order-price">{{ order.total_price|floatformat:0 }} ₽</td>
+                            <td>
+                                <span class="order-status order-status-{{ order.status }}">
+                                    {% if order.status == 'new' %}🆕 Новый
+                                    {% elif order.status == 'processing' %}⚙️ В обработке
+                                    {% elif order.status == 'delivering' %}🚚 Доставляется
+                                    {% elif order.status == 'completed' %}✅ Выполнен
+                                    {% elif order.status == 'cancelled' %}❌ Отменён
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="order-date">{{ order.created|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'shop:admin_order_update' order.id %}" class="status-form">
+                                    {% csrf_token %}
+                                    <select name="status" class="status-select" onchange="this.form.submit()">
+                                        {% for val, label in status_choices %}
+                                        <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>Заказов пока нет</h3>
+                <p>Здесь появятся заказы клиентов</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const chartData = {
+    labels: [{% for d in orders_by_day %}'{{ d.day }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+    orders: [{% for d in orders_by_day %}{{ d.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+    revenue: [{% for d in orders_by_day %}{{ d.revenue }}{% if not forloop.last %},{% endif %}{% endfor %}],
+};
+
+const ctx = document.getElementById('ordersChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: chartData.labels,
+        datasets: [
+            {
+                label: 'Заказы',
+                data: chartData.orders,
+                backgroundColor: 'rgba(200,149,108,0.6)',
+                borderColor: 'rgba(200,149,108,1)',
+                borderWidth: 1,
+                borderRadius: 6,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Выручка (₽)',
+                data: chartData.revenue,
+                type: 'line',
+                borderColor: 'rgba(122,158,126,1)',
+                backgroundColor: 'rgba(122,158,126,0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: 'rgba(122,158,126,1)',
+                yAxisID: 'y1',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                labels: { color: '#f0ece4', font: { family: "'Inter', sans-serif" } }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#8a8578' },
+                grid: { color: 'rgba(42,42,42,0.5)' },
+            },
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                ticks: { color: '#c8956c', stepSize: 1 },
+                grid: { color: 'rgba(42,42,42,0.5)' },
+                title: { display: true, text: 'Заказы', color: '#c8956c' }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                ticks: { color: '#7a9e7e' },
+                grid: { drawOnChartArea: false },
+                title: { display: true, text: 'Выручка ₽', color: '#7a9e7e' }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

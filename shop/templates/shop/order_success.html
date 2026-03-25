@@ -1,0 +1,38 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Заказ оформлен — Emotions{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="success-card animate-fade-up">
+            <div class="success-icon">✅</div>
+            <h1>Спасибо за заказ!</h1>
+            <p class="success-order-id">Заказ #{{ order.id }}</p>
+            <p>Мы свяжемся с вами в ближайшее время для подтверждения.<br>
+            Если у вас есть вопросы, звоните: <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+
+            <div class="success-details">
+                <div class="success-row">
+                    <span>Получатель:</span>
+                    <span>{{ order.first_name }} {{ order.last_name }}</span>
+                </div>
+                <div class="success-row">
+                    <span>Телефон:</span>
+                    <span>{{ order.phone }}</span>
+                </div>
+                <div class="success-row">
+                    <span>Адрес:</span>
+                    <span>{{ order.address }}</span>
+                </div>
+                <div class="success-row">
+                    <span>Сумма:</span>
+                    <span class="success-total">{{ order.total_price|floatformat:0 }} ₽</span>
+                </div>
+            </div>
+
+            <a href="{% url 'shop:home' %}" class="btn btn-primary btn-lg">На главную</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

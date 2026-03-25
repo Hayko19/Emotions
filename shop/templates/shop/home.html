@@ -1,0 +1,131 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Emotions — Цветы и букеты с доставкой{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="container hero-content">
+        <h1 class="hero-title animate-fade-up">
+            Создаём красоту<br>
+            <span class="hero-accent">из живых цветов</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-up delay-1">
+            Изысканные букеты и композиции с доставкой по Москве.<br>
+            Каждый букет — маленькое произведение искусства.
+        </p>
+        <div class="hero-buttons animate-fade-up delay-2">
+            <a href="{% url 'shop:catalog' %}" class="btn btn-primary btn-lg">Смотреть каталог</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features section">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">🌸</div>
+                <h3>Свежие цветы</h3>
+                <p>Только свежие цветы от лучших поставщиков. Каждый букет собирается в день заказа.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">🚚</div>
+                <h3>Быстрая доставка</h3>
+                <p>Доставим ваш букет в течение 2 часов по Москве. Бережно и вовремя.</p>
+            </div>
+            <div class="feature-card animate-on-scroll">
+                <div class="feature-icon">💝</div>
+                <h3>Индивидуальный подход</h3>
+                <p>Соберём букет по вашему желанию. Добавим открытку с тёплыми словами.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+{% if featured %}
+<section class="section featured-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title animate-on-scroll">Популярные букеты</h2>
+            <p class="section-subtitle animate-on-scroll">Наши самые любимые и востребованные композиции</p>
+        </div>
+        <div class="products-grid">
+            {% for product in featured %}
+            <div class="product-card animate-on-scroll">
+                <a href="{{ product.get_absolute_url }}" class="product-image-link">
+                    <div class="product-image-wrapper">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image" loading="lazy">
+                        {% endif %}
+                        <div class="product-overlay">
+                            <span class="product-view-btn">Подробнее</span>
+                        </div>
+                    </div>
+                </a>
+                <div class="product-info">
+                    <span class="product-category">{{ product.category.name }}</span>
+                    <h3 class="product-name">
+                        <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+                    </h3>
+                    <div class="product-bottom">
+                        <span class="product-price">{{ product.price|floatformat:0 }} ₽</span>
+                        <form method="post" action="{% url 'shop:cart_add' product.id %}" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" class="btn btn-cart" title="В корзину">
+                                🛒
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="section-cta">
+            <a href="{% url 'shop:catalog' %}" class="btn btn-outline btn-lg">Весь каталог →</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories -->
+{% if categories %}
+<section class="section categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title animate-on-scroll">Категории</h2>
+            <p class="section-subtitle animate-on-scroll">Букеты на любой вкус и случай</p>
+        </div>
+        <div class="categories-grid">
+            {% for cat in categories %}
+            <a href="{{ cat.get_absolute_url }}" class="category-card animate-on-scroll">
+                {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-image" loading="lazy">
+                {% endif %}
+                <div class="category-overlay">
+                    <h3 class="category-name">{{ cat.name }}</h3>
+                    <span class="category-count">{{ cat.products.count }} товаров</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card animate-on-scroll">
+            <h2>Нужен особенный букет?</h2>
+            <p>Позвоните нам, и мы создадим уникальную композицию специально для вас</p>
+            <a href="tel:+79991234567" class="btn btn-primary btn-lg">📞 +7 (999) 123-45-67</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Emotions — Цветочный магазин{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Emotions — изысканные букеты и композиции из свежих цветов с доставкой.{% endblock %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Header Sticky Wrapper -->
+    <header class="main-header">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="container top-bar-inner">
+                <div class="top-bar-left">
+                    <span><a href="https://yandex.ru/maps/org/emoushn/39542191653/?ll=37.565058%2C55.652905&z=21" target="_blank" class="top-bar-link">📍 Херсонская ул., 20, корп. 2</a></span>
+                    <span class="top-bar-divider">|</span>
+                    <span>🕒 Пн-Вс 08:00 – 21:00</span>
+                </div>
+                <div class="top-bar-right">
+                    <a href="tel:+74955325164">📞 +7 (495) 532-51-64</a>
+                    <a href="tel:+79167078686">📞 +7 (916) 707-86-86</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="navbar" id="navbar">
+            <div class="container navbar-inner">
+                <a href="{% url 'shop:home' %}" class="logo">
+                    <span class="logo-icon">✿</span>
+                    <span class="logo-text">Emotions</span>
+                </a>
+                <div class="nav-links" id="navLinks">
+                    <a href="{% url 'shop:home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a>
+                    <a href="{% url 'shop:catalog' %}" class="nav-link {% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">Каталог</a>
+                    <a href="{% url 'shop:cart' %}" class="nav-link cart-link {% if request.resolver_match.url_name == 'cart' %}active{% endif %}">
+                        <span class="cart-icon">🛒</span>
+                        <span>Корзина</span>
+                        {% if cart_count %}
+                        <span class="cart-badge" id="cartBadge">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% if user.is_staff %}
+                    <a href="{% url 'shop:admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">📊 Управление</a>
+                    {% endif %}
+                </div>
+                <button class="menu-toggle" id="menuToggle" aria-label="Меню">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" data-auto-dismiss>
+            {{ message }}
+            <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-logo"><span class="logo-icon">✿</span> Emotions</h3>
+                    <p class="footer-desc">Изысканные букеты и цветочные композиции для каждого особенного момента вашей жизни.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="{% url 'shop:home' %}">Главная</a></li>
+                        <li><a href="{% url 'shop:catalog' %}">Каталог</a></li>
+                        <li><a href="{% url 'shop:cart' %}">Корзина</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><a href="tel:+74955325164">📞 +7 (495) 532-51-64</a></li>
+                        <li><a href="tel:+79167078686">📞 +7 (916) 707-86-86</a></li>
+                        <li><a href="https://yandex.ru/maps/org/emoushn/39542191653/?ll=37.565058%2C55.652905&z=21" target="_blank">📍 Херсонская ул., 20, корп. 2</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Режим работы</h4>
+                    <ul>
+                        <li>График: Пн-Вс 08:00 – 21:00</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Emotions. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
