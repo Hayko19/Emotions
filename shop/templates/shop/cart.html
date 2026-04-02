@@ -68,7 +68,8 @@
                         <span>{{ total|add:500|floatformat:0 }} ₽</span>
                         {% endif %}
                     </div>
-                    <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg btn-full">Оформить заказ</a>
+                    <a href="{% url 'shop:checkout' %}" class="btn btn-primary btn-lg btn-full"
+                       onclick="if(window.UBA) UBA.beginCheckout()">Оформить заказ</a>
                     <a href="{% url 'shop:catalog' %}" class="btn btn-outline btn-full" style="margin-top: 0.5rem;">Продолжить покупки</a>
                 </div>
             </div>

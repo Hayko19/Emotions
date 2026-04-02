@@ -36,3 +36,14 @@
     </div>
 </section>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+// UBA: фиксируем факт покупки
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.UBA) {
+        UBA.purchase('{{ order.id }}', {{ order.total_price|floatformat:2 }});
+    }
+});
+</script>
+{% endblock %}

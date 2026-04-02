@@ -32,12 +32,12 @@ def catalog(request):
     if current_type == 'stem':
         categories = Category.objects.annotate(
             product_count=Count('products', filter=Q(products__is_by_stem=True, products__available=True))
-        )
+        ).filter(product_count__gt=0)
         products = Product.objects.filter(available=True, is_by_stem=True)
     else:
         categories = Category.objects.annotate(
             product_count=Count('products', filter=Q(products__is_by_stem=False, products__available=True))
-        )
+        ).filter(product_count__gt=0)
         products = Product.objects.filter(available=True, is_by_stem=False)
 
     category_slug = request.GET.get('category')
