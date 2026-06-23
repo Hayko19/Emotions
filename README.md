@@ -1,51 +1,68 @@
-# Emotions — Premium Flower Shop 🌸
+# Emotions — Premium Flower Shop
 
-Элегантная и производительная платформа для флористического магазина, построенная на **Django**. Проект отличается премиальным "светлым" дизайном, интерактивными элементами и мощной панелью управления.
+A full-featured e-commerce platform for a flower shop, built with Django. Includes a product catalog, session-based cart, order checkout, REST API, and a custom sales analytics dashboard.
 
-## ✨ Основные возможности
+## Features
 
-- **Каталог цветов**: Умная фильтрация по категориям, типам (букеты или поштучно) и размерам/вариантам.
-- **Интерактивная корзина**: Добавление товаров без перезагрузки, поддержка различных вариаций одного продукта (стебли разной длины).
-- **Checkout**: Продуманный процесс оформления заказа с автоматическим расчетом стоимости доставки.
-- **Панель управления (Dashboard)**:
-  - Визуализация продаж (графики выручки и заказов через Chart.js).
-  - Топ-5 популярных товаров.
-  - Управление заказами в реальном времени.
-- **Премиальный UI**: Адаптивный дизайн, плавные анимации, "стеклянная" навигация и благородная светлая палитра.
+- **Product catalog** — filter by category and type (bouquets or single stems); sort by price, name, or newest
+- **Product variants** — single-stem products support multiple variants (e.g. different stem lengths or sizes), each with its own price
+- **Interactive cart** — add/update/remove items without page reload; tracks product + variant combinations independently
+- **Checkout** — order form with automatic delivery fee: free for orders over 5 000 ₽, otherwise +500 ₽
+- **Order management** — 5 order statuses (new → processing → delivering → completed / cancelled)
+- **Admin dashboard** — revenue stats (today / week / month / all time), order counts by status, top-5 bestsellers, 7-day charts via Chart.js, recent orders list with inline status update
+- **REST API** — Django REST Framework with Swagger/OpenAPI docs (drf-yasg)
+- **Responsive UI** — smooth animations, glassmorphism navigation, light color palette
 
-## 🛠 Технологии
+## Tech Stack
 
-- **Backend**: Python 3.10+, Django 4.2
-- **Frontend**: Vanilla JS, Modern CSS (Custom Properties), HTML5
-- **База данных**: SQLite (по умолчанию)
-- **Графика**: Pillow
+| Layer | Tech |
+|---|---|
+| Backend | Python 3.10+, Django 4.2 |
+| REST API | Django REST Framework 3.16, drf-yasg (Swagger) |
+| Frontend | Vanilla JS, Modern CSS (Custom Properties), HTML5, Chart.js |
+| Database | SQLite (default) |
+| Image processing | Pillow |
+| Other | django-filter, django-cors-headers, django-admin-sortable2 |
 
-## 🚀 Быстрый старт
+## Getting Started
 
-### 1. Клонирование и установка зависимостей
 ```bash
-git clone <ваш-репозиторий>
+# Clone and install dependencies
+git clone <your-repo-url>
 cd diploma
 python -m venv venv
-source venv/bin/activate  # Для Windows: venv\Scripts\activate
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS / Linux
 pip install -r requirements.txt
-```
 
-### 2. Подготовка базы данных
-```bash
+# Apply migrations
 python manage.py migrate
-```
 
-### 3. Запуск сервера
-```bash
+# (Optional) seed the database with sample data
+python scripts/populate_data.py
+
+# Run the development server
 python manage.py runserver
 ```
-Сайт будет доступен по адресу: `http://127.0.0.1:8000/`
 
-## 📁 Структура проекта
+Open `http://127.0.0.1:8000/` in your browser.
 
-- `flowershop/` — Ядро проекта (настройки, URLы).
-- `shop/` — Основное приложение магазина (модели, контроллеры, шаблоны).
-- `static/` — Статические файлы (стили, скрипты, шрифты).
-- `media/` — Загруженные изображения товаров и баннеров.
-- `scripts/` — Утилиты для заполнения базы данных тестовыми данными.
+The custom dashboard is at `/dashboard/` and requires staff or superuser access.
+
+## Project Structure
+
+```
+diploma/
+├── flowershop/   # Project core (settings, root URLs)
+├── shop/         # Main app (models, views, templates, URLs)
+├── static/       # CSS, JS, fonts
+├── media/        # Uploaded product and banner images
+└── scripts/      # Database seed utilities
+```
+
+## Data Models
+
+- **Category** — product categories with ordering support
+- **Product** — bouquet or single-stem, can be featured on the home page
+- **ProductVariant** — optional size/variant with its own price (for single-stem products)
+- **Order** + **OrderItem** — customer orders with line items and variant references
