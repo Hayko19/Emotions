@@ -61,39 +61,25 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <div class="filter-card">
-                    <h3 class="filter-title">Сортировка</h3>
-                    <ul class="filter-list">
-                        <li>
-                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=default"
-                               class="filter-link {% if current_sort == 'default' %}active{% endif %}">
-                                По умолчанию
-                            </a>
-                        </li>
-                        <li>
-                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_asc"
-                               class="filter-link {% if current_sort == 'price_asc' %}active{% endif %}">
-                                Сначала дешёвые
-                            </a>
-                        </li>
-                        <li>
-                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_desc"
-                               class="filter-link {% if current_sort == 'price_desc' %}active{% endif %}">
-                                Сначала дорогие
-                            </a>
-                        </li>
-                        <li>
-                            <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=newest"
-                               class="filter-link {% if current_sort == 'newest' %}active{% endif %}">
-                                Новинки
-                            </a>
-                        </li>
-                    </ul>
-                </div>
             </aside>
 
             <!-- Products Grid -->
             <div class="catalog-main">
+                <!-- Sort bar -->
+                <div class="sort-bar">
+                    <span class="sort-label">Сортировка:</span>
+                    <div class="sort-options">
+                        <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=default"
+                           class="sort-btn {% if current_sort == 'default' %}active{% endif %}">По умолчанию</a>
+                        <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_asc"
+                           class="sort-btn {% if current_sort == 'price_asc' %}active{% endif %}">Сначала недорогие</a>
+                        <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=price_desc"
+                           class="sort-btn {% if current_sort == 'price_desc' %}active{% endif %}">Сначала дорогие</a>
+                        <a href="?type={{ current_type }}{% if current_category %}&category={{ current_category.slug }}{% endif %}&sort=newest"
+                           class="sort-btn {% if current_sort == 'newest' %}active{% endif %}">Новинки</a>
+                    </div>
+                </div>
+
                 {% if products %}
                 <div class="products-grid">
                     {% for product in products %}

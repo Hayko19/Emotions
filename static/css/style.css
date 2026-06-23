@@ -646,7 +646,7 @@ ul { list-style: none; }
 
 .catalog-sidebar {
     position: sticky;
-    top: 90px;
+    top: 150px;
 }
 
 .filter-card {
@@ -1807,4 +1807,48 @@ ul { list-style: none; }
     .page-header {
         padding-top: 130px !important; /* Adjust if mobile header is different */
     }
+}
+
+/* --- Sort Bar (above product grid) --- */
+.sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.sort-label {
+    font-size: 0.85rem;
+    color: var(--clr-text-muted);
+    white-space: nowrap;
+}
+
+.sort-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.sort-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--clr-border);
+    font-size: 0.82rem;
+    color: var(--clr-text-muted);
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.sort-btn:hover {
+    border-color: var(--clr-primary);
+    color: var(--clr-primary);
+}
+
+.sort-btn.active {
+    background: var(--clr-primary);
+    border-color: var(--clr-primary);
+    color: #fff;
 }

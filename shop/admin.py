@@ -1,14 +1,15 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from adminsortable2.admin import SortableAdminMixin
 from .models import Category, Product, ProductVariant, Order, OrderItem
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug', 'order', 'product_count']
+class CategoryAdmin(SortableAdminMixin, admin.ModelAdmin):
+    list_display = ['name', 'slug', 'product_count']
     prepopulated_fields = {'slug': ('name',)}
-    list_editable = ['order']
     search_fields = ['name']
+    ordering = ['order']
 
     def product_count(self, obj):
         return obj.products.count()

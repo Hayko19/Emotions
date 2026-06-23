@@ -136,6 +136,15 @@ function initAddToCartAjax() {
                         badge.offsetHeight; // trigger reflow
                         badge.style.animation = 'badgePop 0.3s ease';
                     }
+
+                    // UBA Tracking
+                    if (window.UBA) {
+                        const productName = form.closest('.product-card')?.querySelector('.product-title')?.innerText 
+                                        || document.querySelector('.product-name')?.innerText 
+                                        || 'Товар';
+                        const productPrice = form.querySelector('input[name="price"]')?.value || 0;
+                        window.UBA.addToCart(form.action.split('/').filter(Boolean).pop(), productName, productPrice);
+                    }
                 }
 
                 setTimeout(() => {

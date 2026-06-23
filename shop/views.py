@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.db import transaction
 from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
@@ -32,12 +33,12 @@ def catalog(request):
     if current_type == 'stem':
         categories = Category.objects.annotate(
             product_count=Count('products', filter=Q(products__is_by_stem=True, products__available=True))
-        ).filter(product_count__gt=0)
+        ).filter(product_count__gt=0).order_by('order', 'name')
         products = Product.objects.filter(available=True, is_by_stem=True)
     else:
         categories = Category.objects.annotate(
             product_count=Count('products', filter=Q(products__is_by_stem=False, products__available=True))
-        ).filter(product_count__gt=0)
+        ).filter(product_count__gt=0).order_by('order', 'name')
         products = Product.objects.filter(available=True, is_by_stem=False)
 
     category_slug = request.GET.get('category')
@@ -126,10 +127,13 @@ def cart_add(request, product_id):
     variant_id = request.POST.get('variant')
     variant = None
     if variant_id:
-        variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        variant = get_object_or_404(ProductVariant, id=variant_id, product=product, available=True)
 
     product_key = f"{product_id}_{variant.id}" if variant else str(product_id)
-    quantity = int(request.POST.get('quantity', 1))
+    try:
+        quantity = max(1, int(request.POST.get('quantity', 1)))
+    except (ValueError, TypeError):
+        quantity = 1
 
     if product_key in cart:
         cart[product_key]['quantity'] += quantity
@@ -155,7 +159,10 @@ def cart_update(request, key):
     cart = request.session.get('cart', {})
 
     if key in cart:
-        quantity = int(request.POST.get('quantity', 1))
+        try:
+            quantity = int(request.POST.get('quantity', 1))
+        except (ValueError, TypeError):
+            quantity = 1
         if quantity > 0:
             cart[key]['quantity'] = quantity
         else:
@@ -191,46 +198,47 @@ def checkout(request):
         return redirect('shop:catalog')
 
     if request.method == 'POST':
-        order = Order.objects.create(
-            first_name=request.POST.get('first_name', ''),
-            last_name=request.POST.get('last_name', ''),
-            phone=request.POST.get('phone', ''),
-            email=request.POST.get('email', ''),
-            address=request.POST.get('address', ''),
-            comment=request.POST.get('comment', ''),
-        )
+        with transaction.atomic():
+            order = Order.objects.create(
+                first_name=request.POST.get('first_name', ''),
+                last_name=request.POST.get('last_name', ''),
+                phone=request.POST.get('phone', ''),
+                email=request.POST.get('email', ''),
+                address=request.POST.get('address', ''),
+                comment=request.POST.get('comment', ''),
+            )
 
-        total = 0
-        for key, item in cart.items():
-            try:
-                if '_' in key:
-                    product_id, variant_id = key.split('_')
-                    product = Product.objects.get(id=product_id)
-                    variant = ProductVariant.objects.get(id=variant_id)
-                    price = variant.price
-                else:
-                    product = Product.objects.get(id=key)
-                    variant = None
-                    price = product.price
+            total = 0
+            for key, item in cart.items():
+                try:
+                    if '_' in key:
+                        product_id, variant_id = key.split('_')
+                        product = Product.objects.get(id=product_id)
+                        variant = ProductVariant.objects.get(id=variant_id)
+                        price = variant.price
+                    else:
+                        product = Product.objects.get(id=key)
+                        variant = None
+                        price = product.price
 
-                item_total = price * item['quantity']
-                total += item_total
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    variant=variant,
-                    price=price,
-                    quantity=item['quantity'],
-                )
-            except (Product.DoesNotExist, ProductVariant.DoesNotExist, ValueError):
-                continue
+                    item_total = price * item['quantity']
+                    total += item_total
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        variant=variant,
+                        price=price,
+                        quantity=item['quantity'],
+                    )
+                except (Product.DoesNotExist, ProductVariant.DoesNotExist, ValueError):
+                    continue
 
-        # Add delivery fee if applicable
-        if total < 5000:
-            total += 500
-            
-        order.total_price = total
-        order.save()
+            # Add delivery fee if applicable
+            if total < 5000:
+                total += 500
+
+            order.total_price = total
+            order.save()
 
         request.session['cart'] = {}
         request.session.modified = True
